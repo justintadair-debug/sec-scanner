@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Adoption Scanner — SEC Filing Analysis</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c10;
+    --surface: #0d1117;
+    --surface2: #161b22;
+    --border: #21262d;
+    --green: #39d353;
+    --green-dim: #1a4a2e;
+    --red: #f85149;
+    --red-dim: #3d1a1a;
+    --yellow: #e3b341;
+    --yellow-dim: #3d2e0a;
+    --blue: #58a6ff;
+    --blue-dim: #0d1f3c;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --text-dim: #484f58;
+    --accent: #39d353;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Scanline overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* Header */
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 32px;
+    margin-bottom: 48px;
+    animation: fadeDown 0.6s ease both;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    border: 2px solid var(--green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    color: var(--green);
+    position: relative;
+  }
+
+  .logo-icon::before {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    background: var(--green);
+    opacity: 0.1;
+  }
+
+  .logo-text {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(22px, 4vw, 36px);
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  h1 span {
+    color: var(--green);
+  }
+
+  .header-meta {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 10px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 2px;
+    border: 1px solid;
+  }
+
+  .tag-live {
+    color: var(--green);
+    border-color: var(--green);
+    background: var(--green-dim);
+  }
+
+  .tag-live::before {
+    content: '●';
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* Intro */
+  .intro {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--blue);
+    padding: 20px 24px;
+    margin-bottom: 40px;
+    animation: fadeDown 0.6s 0.1s ease both;
+  }
+
+  .intro p {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .intro strong {
+    color: var(--text);
+  }
+
+  /* Summary bar */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 48px;
+    animation: fadeDown 0.6s 0.2s ease both;
+  }
+
+  .summary-stat {
+    background: var(--surface);
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .stat-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .stat-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .stat-value.green { color: var(--green); }
+  .stat-value.red { color: var(--red); }
+  .stat-value.yellow { color: var(--yellow); }
+  .stat-value.blue { color: var(--blue); }
+
+  .stat-sub {
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  /* Section headers */
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Cards */
+  .cards {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 48px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 0;
+    overflow: hidden;
+    transition: border-color 0.2s;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .card:hover {
+    border-color: #30363d;
+  }
+
+  .card-header {
+    display: grid;
+    grid-template-columns: 100px 1fr auto;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 24px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .ticker-block {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .ticker {
+    font-family: 'Space Mono', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.05em;
+  }
+
+  .company-name {
+    font-size: 11px;
+    color: var(--text-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 80px;
+  }
+
+  .score-block {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+  }
+
+  .score-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .score-number {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    min-width: 36px;
+  }
+
+  .score-bar-track {
+    flex: 1;
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 0;
+    overflow: hidden;
+    max-width: 300px;
+  }
+
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 0;
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 0;
+  }
+
+  .verdict-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border: 1px solid;
+    white-space: nowrap;
+  }
+
+  .card-toggle {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    transition: transform 0.2s;
+    padding: 4px 8px;
+  }
+
+  .card.open .card-toggle {
+    transform: rotate(180deg);
+  }
+
+  .card-body {
+    display: none;
+    border-top: 1px solid var(--border);
+    padding: 24px;
+    background: var(--surface2);
+  }
+
+  .card.open .card-body {
+    display: block;
+    animation: fadeDown 0.2s ease;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 600px) {
+    .detail-grid { grid-template-columns: 1fr; }
+    .card-header { grid-template-columns: 80px 1fr auto; gap: 12px; }
+  }
+
+  .detail-section h4 {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+  }
+
+  .score-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .score-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+
+  .score-item-label {
+    color: var(--text-muted);
+    min-width: 130px;
+    font-size: 11px;
+  }
+
+  .score-item-bar {
+    flex: 1;
+    height: 3px;
+    background: var(--surface);
+    max-width: 120px;
+  }
+
+  .score-item-fill {
+    height: 100%;
+    transition: width 1.2s ease;
+    width: 0;
+  }
+
+  .score-item-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    min-width: 28px;
+    text-align: right;
+  }
+
+  .findings-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .findings-list li {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    padding-left: 16px;
+    position: relative;
+  }
+
+  .findings-list li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--text-dim);
+    font-family: 'Space Mono', monospace;
+  }
+
+  .findings-list li.red::before { color: var(--red); content: '⚠'; }
+
+  .takeaway {
+    background: var(--surface);
+    border-left: 2px solid var(--blue);
+    padding: 12px 16px;
+    margin-top: 16px;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .takeaway strong {
+    color: var(--blue);
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  /* Analyst note */
+  .analyst-note {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--yellow);
+    padding: 24px;
+    margin-bottom: 48px;
+    animation: fadeUp 0.5s 0.4s ease both;
+  }
+
+  .analyst-note-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .analyst-note-header h3 {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--yellow);
+  }
+
+  .analyst-note p {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.8;
+    margin-bottom: 12px;
+  }
+
+  .analyst-note p:last-child { margin-bottom: 0; }
+
+  .analyst-note strong { color: var(--text); }
+
+  /* Methodology */
+  .methodology {
+    border: 1px solid var(--border);
+    padding: 24px;
+    margin-bottom: 48px;
+    animation: fadeUp 0.5s 0.5s ease both;
+  }
+
+  .methodology h3 {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+
+  .method-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+  }
+
+  .method-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .method-item-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--green);
+    letter-spacing: 0.05em;
+  }
+
+  .method-item-desc {
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  /* Footer */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* Animations */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Color helpers */
+  .c-green { color: var(--green); }
+  .c-red { color: var(--red); }
+  .c-yellow { color: var(--yellow); }
+  .c-blue { color: var(--blue); }
+  .c-muted { color: var(--text-muted); }
+
+  .bg-green { background: var(--green); }
+  .bg-red { background: var(--red); }
+  .bg-yellow { background: var(--yellow); }
+  .bg-blue { background: var(--blue); }
+
+  .border-green { border-color: var(--green); color: var(--green); background: var(--green-dim); }
+  .border-red { border-color: var(--red); color: var(--red); background: var(--red-dim); }
+  .border-yellow { border-color: var(--yellow); color: var(--yellow); background: var(--yellow-dim); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">AI</div>
+      <span class="logo-text">SEC Filing Intelligence</span>
+    </div>
+    <div class="header-top">
+      <div>
+        <h1>AI Adoption <span>Scanner</span></h1>
+        <p class="header-meta">// 10-K Filing Analysis — 11 Companies — Feb 2026</p>
+      </div>
+      <span class="tag tag-live">Live Data</span>
+    </div>
+  </div>
+
+  <!-- Intro -->
+  <div class="intro">
+    <p>This tool scans actual SEC 10-K filings — the annual reports companies are legally required to file — and uses AI to separate <strong>genuine AI adoption</strong> from <strong>AI washing</strong>. Every company claims to be "leveraging AI." We built a scanner to find out who's actually doing it.</p>
+  </div>
+
+  <!-- Summary Stats -->
+  <div class="summary-grid">
+    <div class="summary-stat">
+      <span class="stat-label">Companies Scanned</span>
+      <span class="stat-value blue">11</span>
+      <span class="stat-sub">SEC 10-K filings</span>
+    </div>
+    <div class="summary-stat">
+      <span class="stat-label">Genuine Adopters</span>
+      <span class="stat-value green">7</span>
+      <span class="stat-sub">Score ≥ 60/100</span>
+    </div>
+    <div class="summary-stat">
+      <span class="stat-label">AI Washing Caught</span>
+      <span class="stat-value red">4</span>
+      <span class="stat-sub">Vague claims, no substance</span>
+    </div>
+    <div class="summary-stat">
+      <span class="stat-label">Top Score</span>
+      <span class="stat-value yellow">90</span>
+      <span class="stat-sub">NVDA — Nvidia</span>
+    </div>
+  </div>
+
+  <!-- Genuine Adopters -->
+  <div class="section-label">Genuine AI Adopters</div>
+  <div class="cards" id="genuine-cards"></div>
+
+  <!-- AI Washers -->
+  <div class="section-label">AI Washing Detected</div>
+  <div class="cards" id="washing-cards"></div>
+
+  <!-- Analyst Note -->
+  <div class="analyst-note">
+    <div class="analyst-note-header">
+      <span class="c-yellow">◆</span>
+      <h3>Analyst Notes — Surprising Findings</h3>
+    </div>
+    <p><strong>IBM — The Biggest Surprise.</strong> IBM has been marketing itself as an AI company for over a decade, with Watson being one of the most advertised AI products in history. Yet their 10-K tells a completely different story — generic buzzwords, zero specific implementations, no metrics. This is perhaps the most striking example of the gap between marketing and reality in our dataset.</p>
+    <p><strong>JPMorgan — Deliberately Vague?</strong> JPM scored 10/100, which initially seems shocking for a bank that's publicly committed $17B+ to technology annually. However, large financial institutions often deliberately keep AI strategy out of public filings for <strong>competitive intelligence reasons</strong> — they don't want competitors knowing exactly how they're using AI in trading, risk models, or fraud detection. Low filing score ≠ low actual AI adoption here.</p>
+    <p><strong>Veeva — Classic AI Washing.</strong> Veeva is a $30B healthcare software company. They only mention AI in the context of regulatory risk (EU AI Act compliance) rather than as a business driver. Their exact words: "recently began incorporating AI capabilities into certain solutions" — with zero specifics. This is textbook AI washing from a company that should be AI-first by now.</p>
+    <p><strong>Walmart — Interesting Outlier.</strong> WMT scored 24/100 which seems low, but for a traditional retailer this actually makes sense. Their AI use is operational (supply chain, inventory, personalization) rather than product-defining. The filing vagueness may reflect genuine early-stage adoption rather than washing.</p>
+  </div>
+
+  <!-- Methodology -->
+  <div class="methodology">
+    <h3>// How This Works</h3>
+    <div class="method-grid">
+      <div class="method-item">
+        <span class="method-item-title">01 — Data Source</span>
+        <span class="method-item-desc">Pulls actual 10-K filings directly from SEC EDGAR. No summaries or secondary sources — raw legal documents.</span>
+      </div>
+      <div class="method-item">
+        <span class="method-item-title">02 — Text Extraction</span>
+        <span class="method-item-desc">Strips 500k+ character HTML filings down to clean text, removing XBRL financial tags and boilerplate.</span>
+      </div>
+      <div class="method-item">
+        <span class="method-item-title">03 — AI Analysis</span>
+        <span class="method-item-desc">Claude analyzes the most AI-relevant sections and scores on 5 dimensions with specific evidence.</span>
+      </div>
+      <div class="method-item">
+        <span class="method-item-title">04 — Scoring</span>
+        <span class="method-item-desc">Specificity, Financial Impact, Integration Depth, Competitive Moat, Execution Evidence — each 0–10.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>SEC AI Adoption Scanner // Built with Python + Claude API</span>
+    <span>Data: SEC EDGAR 10-K Filings // February 2026</span>
+  </div>
+
+</div>
+
+<script>
+const data = [
+  {
+    ticker: "NVDA", company: "Nvidia", score: 90, verdict: "Genuine AI Adopter", date: "2025-02-26",
+    scores: { SPECIFICITY: 9, FINANCIAL_IMPACT: 9, INTEGRATION_DEPTH: 10, COMPETITIVE_MOAT: 9, EXECUTION_EVIDENCE: 9 },
+    findings: ["AI accelerators are the core product — $130B+ revenue is almost entirely AI-driven hardware", "Data center segment grew 142% YoY driven entirely by AI compute demand", "CUDA ecosystem creates deep competitive moat with millions of developers locked in"],
+    flags: ["Concentration risk — overwhelming dependence on AI demand cycle"],
+    takeaway: "Nvidia is the purest AI play in the market. Their entire business model is AI infrastructure, with financial results that prove it."
+  },
+  {
+    ticker: "MSFT", company: "Microsoft", score: 80, verdict: "Genuine AI Adopter", date: "2025-07-30",
+    scores: { SPECIFICITY: 8, FINANCIAL_IMPACT: 7, INTEGRATION_DEPTH: 8, COMPETITIVE_MOAT: 8, EXECUTION_EVIDENCE: 8 },
+    findings: ["Copilot integrated across all major product lines — Azure, Office 365, Teams, GitHub", "Azure AI revenue contributing meaningfully to cloud growth acceleration", "OpenAI partnership provides differentiated model access competitors lack"],
+    flags: ["Heavy capital expenditure on AI infrastructure creates margin pressure", "Copilot adoption metrics remain somewhat vague in filings"],
+    takeaway: "Microsoft has genuinely embedded AI across its product ecosystem with real revenue impact, making it one of the most credible AI adopters among large-cap tech."
+  },
+  {
+    ticker: "GOOGL", company: "Alphabet", score: 80, verdict: "Genuine AI Adopter", date: "2025-02-04",
+    scores: { SPECIFICITY: 8, FINANCIAL_IMPACT: 7, INTEGRATION_DEPTH: 9, COMPETITIVE_MOAT: 8, EXECUTION_EVIDENCE: 7 },
+    findings: ["Gemini models deployed across Search, Cloud, Workspace — billions of users touched", "Google Cloud AI growing significantly faster than overall cloud segment", "DeepMind and Google Brain research-to-product pipeline is unmatched in scale"],
+    flags: ["Search AI overviews risk cannibalizing core ad revenue long term", "Monetization of AI investments still developing"],
+    takeaway: "Alphabet has AI deeply embedded in both consumer and enterprise products, with genuine research depth — though the financial flywheel is still building."
+  },
+  {
+    ticker: "CRM", company: "Salesforce", score: 70, verdict: "Genuine AI Adopter", date: "2025-03-06",
+    scores: { SPECIFICITY: 7, FINANCIAL_IMPACT: 5, INTEGRATION_DEPTH: 7, COMPETITIVE_MOAT: 6, EXECUTION_EVIDENCE: 7 },
+    findings: ["Agentforce platform described with specific autonomous agent capabilities for sales and service workflows", "Einstein AI suite embedded across Sales Cloud, Service Cloud, Marketing Cloud", "Data Cloud integration enables AI personalization at scale across customer touchpoints"],
+    flags: ["Financial impact of AI premium pricing not yet clearly quantified in filings", "Agent platform is early stage — production deployments limited so far"],
+    takeaway: "Salesforce is making a genuine pivot to AI-native CRM with Agentforce, but revenue uplift from AI products is not yet clearly demonstrated in filings."
+  },
+  {
+    ticker: "ORCL", company: "Oracle", score: 68, verdict: "Genuine AI Adopter", date: "2025-09-15",
+    scores: { SPECIFICITY: 7, FINANCIAL_IMPACT: 6, INTEGRATION_DEPTH: 7, COMPETITIVE_MOAT: 6, EXECUTION_EVIDENCE: 6 },
+    findings: ["OCI (Oracle Cloud Infrastructure) AI services described with specific GPU cluster builds for large model training", "Autonomous Database with AI-driven self-tuning is a differentiating product feature", "Healthcare-specific AI applications described with named customer deployments"],
+    flags: ["Legacy database business creates perception that AI is bolt-on rather than core", "Cloud growth partially obscured by legacy on-premise maintenance revenue"],
+    takeaway: "Oracle's OCI is emerging as a credible AI cloud competitor, with specific AI infrastructure investments and autonomous database capabilities showing genuine technical depth."
+  },
+  {
+    ticker: "PATH", company: "UiPath", score: 64, verdict: "Genuine AI Adopter", date: "2025-03-24",
+    scores: { SPECIFICITY: 7, FINANCIAL_IMPACT: 3, INTEGRATION_DEPTH: 9, COMPETITIVE_MOAT: 6, EXECUTION_EVIDENCE: 7 },
+    findings: ["AI deeply integrated throughout core platform with named products: Autopilot, Clipboard AI, Agent Builder, Agentic Orchestration", "Evolution from pure RPA to AI-native automation platform is well-documented with specific releases", "Agentic automation pivot shows execution beyond just marketing — products in preview stages"],
+    flags: ["No quantified financial metrics or ROI data from AI implementations", "Heavy use of buzzwords like 'AI-native platform' needs more financial backing"],
+    takeaway: "UiPath demonstrates genuine AI integration across its automation platform, but lacks financial quantification — making it hard to assess true value creation from their AI pivot."
+  },
+  {
+    ticker: "PLTR", company: "Palantir", score: 62, verdict: "Genuine AI Adopter", date: "2026-02-17",
+    scores: { SPECIFICITY: 7, FINANCIAL_IMPACT: 3, INTEGRATION_DEPTH: 8, COMPETITIVE_MOAT: 7, EXECUTION_EVIDENCE: 6 },
+    findings: ["AIP (AI Platform) is a real product enabling secure LLM connectivity and AI agent deployment for enterprise", "AI woven into core Ontology system that underpins all Palantir platforms", "Real government and commercial customer deployments documented across sectors"],
+    flags: ["No revenue breakdown specifically attributable to AI features despite $4.5B total revenue", "Risk disclosure acknowledges uncertainty about AI adoption success"],
+    takeaway: "Palantir's AI integration is genuine with AIP as a core platform — but the lack of AI-specific revenue attribution makes it hard to value the AI premium investors are paying."
+  },
+  {
+    ticker: "WMT", company: "Walmart", score: 24, verdict: "Strong AI Washing", date: "2025-03-20",
+    scores: { SPECIFICITY: 2, FINANCIAL_IMPACT: 1, INTEGRATION_DEPTH: 3, COMPETITIVE_MOAT: 2, EXECUTION_EVIDENCE: 2 },
+    findings: ["AI mentioned primarily in supply chain and logistics contexts without specific implementations", "No named AI products, tools, or partnerships described in meaningful detail", "Generic statements about using technology to improve operations"],
+    flags: ["AI language appears to be investor relations framing rather than operational reality", "No quantified benefits despite being among the world's largest retailers with massive data assets"],
+    takeaway: "Walmart's AI adoption per their 10-K appears more aspirational than operational. Their data scale should make them a strong AI candidate, but the filing doesn't support that narrative."
+  },
+  {
+    ticker: "VEEV", company: "Veeva Systems", score: 16, verdict: "Strong AI Washing", date: "2025-03-24",
+    scores: { SPECIFICITY: 2, FINANCIAL_IMPACT: 0, INTEGRATION_DEPTH: 3, COMPETITIVE_MOAT: 1, EXECUTION_EVIDENCE: 2 },
+    findings: ["AI mentioned only in risk disclosures and regulatory compliance contexts", "Only statement: 'recently began incorporating AI capabilities into certain solutions' — zero specifics", "Primary AI discussion focuses on cybersecurity threats from AI, not business opportunities"],
+    flags: ["Zero concrete details about AI implementations despite being a $30B healthcare tech company", "AI mentioned primarily as EU AI Act compliance burden rather than value driver"],
+    takeaway: "Veeva is a surprising AI washing case — a large, modern SaaS company with no substantive AI strategy in their 10-K. They appear to be significantly behind peers in AI integration."
+  },
+  {
+    ticker: "IBM", company: "IBM", score: 10, verdict: "Strong AI Washing", date: "2026-02-24",
+    scores: { SPECIFICITY: 1, FINANCIAL_IMPACT: 0, INTEGRATION_DEPTH: 2, COMPETITIVE_MOAT: 1, EXECUTION_EVIDENCE: 1 },
+    findings: ["AI mentioned only in vague strategic statements — no specific implementations, products, or use cases", "No quantified metrics or measurable business impact from AI initiatives", "Filing focuses on corporate governance with minimal operational AI content"],
+    flags: ["Generic 'hybrid cloud and AI' positioning without any substance", "No evidence of actual AI products despite years of Watson marketing", "'Key innovations in AI' mentioned in cybersecurity section but zero details provided"],
+    takeaway: "IBM's 10-K is the biggest surprise in our dataset. Despite a decade of AI marketing around Watson, their filing shows classic AI washing — strategic buzzwords with zero operational substance."
+  },
+  {
+    ticker: "JPM", company: "JPMorgan Chase", score: 10, verdict: "Strong AI Washing", date: "2026-02-13",
+    scores: { SPECIFICITY: 1, FINANCIAL_IMPACT: 0, INTEGRATION_DEPTH: 2, COMPETITIVE_MOAT: 1, EXECUTION_EVIDENCE: 1 },
+    findings: ["AI mentioned only in generic regulatory compliance and cybersecurity risk contexts", "No specific AI products, tools, or implementations described", "AI appears primarily as a risk factor rather than business opportunity"],
+    flags: ["Zero concrete details despite $17B+ annual technology investment", "No quantified benefits from any AI initiatives mentioned in filing"],
+    takeaway: "JPM's low score likely reflects deliberate vagueness — large banks hide AI strategy to protect competitive advantage in trading and risk models. Low filing score ≠ low actual AI adoption."
+  }
+];
+
+function getColor(score) {
+  if (score >= 60) return 'green';
+  if (score >= 30) return 'yellow';
+  return 'red';
+}
+
+function getVerdictClass(verdict) {
+  if (verdict.includes('Genuine')) return 'border-green';
+  if (verdict.includes('Strong')) return 'border-red';
+  return 'border-yellow';
+}
+
+function renderCard(d, idx) {
+  const color = getColor(d.score);
+  const delay = idx * 0.06;
+  const flagsHtml = d.flags.map(f => `<li class="red">${f}</li>`).join('');
+  const findingsHtml = d.findings.map(f => `<li>${f}</li>`).join('');
+  const scoreItems = Object.entries(d.scores).map(([k, v]) => `
+    <div class="score-item">
+      <span class="score-item-label">${k.replace('_', ' ')}</span>
+      <div class="score-item-bar"><div class="score-item-fill bg-${getColor(v*10)}" data-width="${v*10}%"></div></div>
+      <span class="score-item-num c-${getColor(v*10)}">${v}/10</span>
+    </div>
+  `).join('');
+
+  return `
+    <div class="card" style="animation-delay:${delay}s">
+      <div class="card-header" onclick="toggle(this)">
+        <div class="ticker-block">
+          <span class="ticker">${d.ticker}</span>
+          <span class="company-name">${d.company}</span>
+        </div>
+        <div class="score-block">
+          <div class="score-row">
+            <span class="score-number c-${color}">${d.score}</span>
+            <div class="score-bar-track">
+              <div class="score-bar-fill bg-${color}" data-width="${d.score}%"></div>
+            </div>
+            <span class="verdict-badge ${getVerdictClass(d.verdict)}">${d.verdict}</span>
+          </div>
+        </div>
+        <span class="card-toggle">▼</span>
+      </div>
+      <div class="card-body">
+        <div class="detail-grid">
+          <div class="detail-section">
+            <h4>Dimension Scores</h4>
+            <div class="score-list">${scoreItems}</div>
+          </div>
+          <div class="detail-section">
+            <h4>Key Findings</h4>
+            <ul class="findings-list">${findingsHtml}</ul>
+            ${d.flags.length ? `<br><h4>Red Flags</h4><ul class="findings-list">${flagsHtml}</ul>` : ''}
+          </div>
+        </div>
+        <div class="takeaway">
+          <strong>// Investment Takeaway</strong>
+          ${d.takeaway}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function toggle(header) {
+  const card = header.parentElement;
+  card.classList.toggle('open');
+  setTimeout(animateBars, 50);
+}
+
+function animateBars() {
+  document.querySelectorAll('[data-width]').forEach(el => {
+    el.style.width = el.dataset.width;
+  });
+}
+
+// Render cards
+const genuine = data.filter(d => d.score >= 60);
+const washing = data.filter(d => d.score < 60);
+
+document.getElementById('genuine-cards').innerHTML = genuine.map((d,i) => renderCard(d,i)).join('');
+document.getElementById('washing-cards').innerHTML = washing.map((d,i) => renderCard(d,i)).join('');
+
+// Animate bars on load
+setTimeout(animateBars, 300);
+</script>
+</body>
+</html>
