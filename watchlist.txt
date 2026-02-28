@@ -1,0 +1,16 @@
+# SEC Scanner Watchlist
+# Add one ticker per line. Lines starting with # are ignored.
+# Run: sec-scanner --watchlist
+
+NVDA
+MSFT
+AAPL
+AMZN
+GOOG
+META
+TSLA
+CRM
+IBM
+ORCL
+NFLX
+JPM

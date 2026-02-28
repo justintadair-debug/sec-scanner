@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sec-scanner"
+version = "0.1.0"
+description = "SEC 10-K filing scanner that detects genuine AI adoption vs AI washing"
+requires-python = ">=3.10"
+dependencies = [
+    "requests>=2.31",
+    "beautifulsoup4>=4.12",
+]
+
+[project.scripts]
+sec-scanner = "sec_scanner.cli:main"

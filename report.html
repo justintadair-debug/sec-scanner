@@ -602,7 +602,7 @@
     <div class="header-top">
       <div>
         <h1>AI Adoption <span>Scanner</span></h1>
-        <p class="header-meta">// 10-K Filing Analysis — 11 Companies — Feb 2026</p>
+        <p class="header-meta">// 10-K Filing Analysis — 1 Companies — Feb 2026</p>
       </div>
       <span class="tag tag-live">Live Data</span>
     </div>
@@ -617,23 +617,23 @@
   <div class="summary-grid">
     <div class="summary-stat">
       <span class="stat-label">Companies Scanned</span>
-      <span class="stat-value blue">11</span>
+      <span class="stat-value blue">1</span>
       <span class="stat-sub">SEC 10-K filings</span>
     </div>
     <div class="summary-stat">
       <span class="stat-label">Genuine Adopters</span>
-      <span class="stat-value green">7</span>
+      <span class="stat-value green">1</span>
       <span class="stat-sub">Score ≥ 60/100</span>
     </div>
     <div class="summary-stat">
       <span class="stat-label">AI Washing Caught</span>
-      <span class="stat-value red">4</span>
+      <span class="stat-value red">0</span>
       <span class="stat-sub">Vague claims, no substance</span>
     </div>
     <div class="summary-stat">
       <span class="stat-label">Top Score</span>
-      <span class="stat-value yellow">90</span>
-      <span class="stat-sub">NVDA — Nvidia</span>
+      <span class="stat-value yellow">94</span>
+      <span class="stat-sub">NVDA — NVIDIA CORP</span>
     </div>
   </div>
 
@@ -651,10 +651,8 @@
       <span class="c-yellow">◆</span>
       <h3>Analyst Notes — Surprising Findings</h3>
     </div>
-    <p><strong>IBM — The Biggest Surprise.</strong> IBM has been marketing itself as an AI company for over a decade, with Watson being one of the most advertised AI products in history. Yet their 10-K tells a completely different story — generic buzzwords, zero specific implementations, no metrics. This is perhaps the most striking example of the gap between marketing and reality in our dataset.</p>
-    <p><strong>JPMorgan — Deliberately Vague?</strong> JPM scored 10/100, which initially seems shocking for a bank that's publicly committed $17B+ to technology annually. However, large financial institutions often deliberately keep AI strategy out of public filings for <strong>competitive intelligence reasons</strong> — they don't want competitors knowing exactly how they're using AI in trading, risk models, or fraud detection. Low filing score ≠ low actual AI adoption here.</p>
-    <p><strong>Veeva — Classic AI Washing.</strong> Veeva is a $30B healthcare software company. They only mention AI in the context of regulatory risk (EU AI Act compliance) rather than as a business driver. Their exact words: "recently began incorporating AI capabilities into certain solutions" — with zero specifics. This is textbook AI washing from a company that should be AI-first by now.</p>
-    <p><strong>Walmart — Interesting Outlier.</strong> WMT scored 24/100 which seems low, but for a traditional retailer this actually makes sense. Their AI use is operational (supply chain, inventory, personalization) rather than product-defining. The filing vagueness may reflect genuine early-stage adoption rather than washing.</p>
+    <p><strong>NVDA — Top Scorer (94/100).</strong> NVIDIA is the definitive AI infrastructure company — AI is not a feature but the entire business thesis, with unmatched ecosystem depth across hardware, software, and developer adoption. However, investors should closely monitor the compounding impact of U.S.-China export controls eroding addressable market and the accelerating custom silicon efforts by hyperscalers, which together represent the most credible long-term threats to NVIDIA's dominant position.</p>
+  
   </div>
 
   <!-- Methodology -->
@@ -690,81 +688,30 @@
 <script>
 const data = [
   {
-    ticker: "NVDA", company: "Nvidia", score: 90, verdict: "Genuine AI Adopter", date: "2025-02-26",
-    scores: { SPECIFICITY: 9, FINANCIAL_IMPACT: 9, INTEGRATION_DEPTH: 10, COMPETITIVE_MOAT: 9, EXECUTION_EVIDENCE: 9 },
-    findings: ["AI accelerators are the core product — $130B+ revenue is almost entirely AI-driven hardware", "Data center segment grew 142% YoY driven entirely by AI compute demand", "CUDA ecosystem creates deep competitive moat with millions of developers locked in"],
-    flags: ["Concentration risk — overwhelming dependence on AI demand cycle"],
-    takeaway: "Nvidia is the purest AI play in the market. Their entire business model is AI infrastructure, with financial results that prove it."
-  },
-  {
-    ticker: "MSFT", company: "Microsoft", score: 80, verdict: "Genuine AI Adopter", date: "2025-07-30",
-    scores: { SPECIFICITY: 8, FINANCIAL_IMPACT: 7, INTEGRATION_DEPTH: 8, COMPETITIVE_MOAT: 8, EXECUTION_EVIDENCE: 8 },
-    findings: ["Copilot integrated across all major product lines — Azure, Office 365, Teams, GitHub", "Azure AI revenue contributing meaningfully to cloud growth acceleration", "OpenAI partnership provides differentiated model access competitors lack"],
-    flags: ["Heavy capital expenditure on AI infrastructure creates margin pressure", "Copilot adoption metrics remain somewhat vague in filings"],
-    takeaway: "Microsoft has genuinely embedded AI across its product ecosystem with real revenue impact, making it one of the most credible AI adopters among large-cap tech."
-  },
-  {
-    ticker: "GOOGL", company: "Alphabet", score: 80, verdict: "Genuine AI Adopter", date: "2025-02-04",
-    scores: { SPECIFICITY: 8, FINANCIAL_IMPACT: 7, INTEGRATION_DEPTH: 9, COMPETITIVE_MOAT: 8, EXECUTION_EVIDENCE: 7 },
-    findings: ["Gemini models deployed across Search, Cloud, Workspace — billions of users touched", "Google Cloud AI growing significantly faster than overall cloud segment", "DeepMind and Google Brain research-to-product pipeline is unmatched in scale"],
-    flags: ["Search AI overviews risk cannibalizing core ad revenue long term", "Monetization of AI investments still developing"],
-    takeaway: "Alphabet has AI deeply embedded in both consumer and enterprise products, with genuine research depth — though the financial flywheel is still building."
-  },
-  {
-    ticker: "CRM", company: "Salesforce", score: 70, verdict: "Genuine AI Adopter", date: "2025-03-06",
-    scores: { SPECIFICITY: 7, FINANCIAL_IMPACT: 5, INTEGRATION_DEPTH: 7, COMPETITIVE_MOAT: 6, EXECUTION_EVIDENCE: 7 },
-    findings: ["Agentforce platform described with specific autonomous agent capabilities for sales and service workflows", "Einstein AI suite embedded across Sales Cloud, Service Cloud, Marketing Cloud", "Data Cloud integration enables AI personalization at scale across customer touchpoints"],
-    flags: ["Financial impact of AI premium pricing not yet clearly quantified in filings", "Agent platform is early stage — production deployments limited so far"],
-    takeaway: "Salesforce is making a genuine pivot to AI-native CRM with Agentforce, but revenue uplift from AI products is not yet clearly demonstrated in filings."
-  },
-  {
-    ticker: "ORCL", company: "Oracle", score: 68, verdict: "Genuine AI Adopter", date: "2025-09-15",
-    scores: { SPECIFICITY: 7, FINANCIAL_IMPACT: 6, INTEGRATION_DEPTH: 7, COMPETITIVE_MOAT: 6, EXECUTION_EVIDENCE: 6 },
-    findings: ["OCI (Oracle Cloud Infrastructure) AI services described with specific GPU cluster builds for large model training", "Autonomous Database with AI-driven self-tuning is a differentiating product feature", "Healthcare-specific AI applications described with named customer deployments"],
-    flags: ["Legacy database business creates perception that AI is bolt-on rather than core", "Cloud growth partially obscured by legacy on-premise maintenance revenue"],
-    takeaway: "Oracle's OCI is emerging as a credible AI cloud competitor, with specific AI infrastructure investments and autonomous database capabilities showing genuine technical depth."
-  },
-  {
-    ticker: "PATH", company: "UiPath", score: 64, verdict: "Genuine AI Adopter", date: "2025-03-24",
-    scores: { SPECIFICITY: 7, FINANCIAL_IMPACT: 3, INTEGRATION_DEPTH: 9, COMPETITIVE_MOAT: 6, EXECUTION_EVIDENCE: 7 },
-    findings: ["AI deeply integrated throughout core platform with named products: Autopilot, Clipboard AI, Agent Builder, Agentic Orchestration", "Evolution from pure RPA to AI-native automation platform is well-documented with specific releases", "Agentic automation pivot shows execution beyond just marketing — products in preview stages"],
-    flags: ["No quantified financial metrics or ROI data from AI implementations", "Heavy use of buzzwords like 'AI-native platform' needs more financial backing"],
-    takeaway: "UiPath demonstrates genuine AI integration across its automation platform, but lacks financial quantification — making it hard to assess true value creation from their AI pivot."
-  },
-  {
-    ticker: "PLTR", company: "Palantir", score: 62, verdict: "Genuine AI Adopter", date: "2026-02-17",
-    scores: { SPECIFICITY: 7, FINANCIAL_IMPACT: 3, INTEGRATION_DEPTH: 8, COMPETITIVE_MOAT: 7, EXECUTION_EVIDENCE: 6 },
-    findings: ["AIP (AI Platform) is a real product enabling secure LLM connectivity and AI agent deployment for enterprise", "AI woven into core Ontology system that underpins all Palantir platforms", "Real government and commercial customer deployments documented across sectors"],
-    flags: ["No revenue breakdown specifically attributable to AI features despite $4.5B total revenue", "Risk disclosure acknowledges uncertainty about AI adoption success"],
-    takeaway: "Palantir's AI integration is genuine with AIP as a core platform — but the lack of AI-specific revenue attribution makes it hard to value the AI premium investors are paying."
-  },
-  {
-    ticker: "WMT", company: "Walmart", score: 24, verdict: "Strong AI Washing", date: "2025-03-20",
-    scores: { SPECIFICITY: 2, FINANCIAL_IMPACT: 1, INTEGRATION_DEPTH: 3, COMPETITIVE_MOAT: 2, EXECUTION_EVIDENCE: 2 },
-    findings: ["AI mentioned primarily in supply chain and logistics contexts without specific implementations", "No named AI products, tools, or partnerships described in meaningful detail", "Generic statements about using technology to improve operations"],
-    flags: ["AI language appears to be investor relations framing rather than operational reality", "No quantified benefits despite being among the world's largest retailers with massive data assets"],
-    takeaway: "Walmart's AI adoption per their 10-K appears more aspirational than operational. Their data scale should make them a strong AI candidate, but the filing doesn't support that narrative."
-  },
-  {
-    ticker: "VEEV", company: "Veeva Systems", score: 16, verdict: "Strong AI Washing", date: "2025-03-24",
-    scores: { SPECIFICITY: 2, FINANCIAL_IMPACT: 0, INTEGRATION_DEPTH: 3, COMPETITIVE_MOAT: 1, EXECUTION_EVIDENCE: 2 },
-    findings: ["AI mentioned only in risk disclosures and regulatory compliance contexts", "Only statement: 'recently began incorporating AI capabilities into certain solutions' — zero specifics", "Primary AI discussion focuses on cybersecurity threats from AI, not business opportunities"],
-    flags: ["Zero concrete details about AI implementations despite being a $30B healthcare tech company", "AI mentioned primarily as EU AI Act compliance burden rather than value driver"],
-    takeaway: "Veeva is a surprising AI washing case — a large, modern SaaS company with no substantive AI strategy in their 10-K. They appear to be significantly behind peers in AI integration."
-  },
-  {
-    ticker: "IBM", company: "IBM", score: 10, verdict: "Strong AI Washing", date: "2026-02-24",
-    scores: { SPECIFICITY: 1, FINANCIAL_IMPACT: 0, INTEGRATION_DEPTH: 2, COMPETITIVE_MOAT: 1, EXECUTION_EVIDENCE: 1 },
-    findings: ["AI mentioned only in vague strategic statements — no specific implementations, products, or use cases", "No quantified metrics or measurable business impact from AI initiatives", "Filing focuses on corporate governance with minimal operational AI content"],
-    flags: ["Generic 'hybrid cloud and AI' positioning without any substance", "No evidence of actual AI products despite years of Watson marketing", "'Key innovations in AI' mentioned in cybersecurity section but zero details provided"],
-    takeaway: "IBM's 10-K is the biggest surprise in our dataset. Despite a decade of AI marketing around Watson, their filing shows classic AI washing — strategic buzzwords with zero operational substance."
-  },
-  {
-    ticker: "JPM", company: "JPMorgan Chase", score: 10, verdict: "Strong AI Washing", date: "2026-02-13",
-    scores: { SPECIFICITY: 1, FINANCIAL_IMPACT: 0, INTEGRATION_DEPTH: 2, COMPETITIVE_MOAT: 1, EXECUTION_EVIDENCE: 1 },
-    findings: ["AI mentioned only in generic regulatory compliance and cybersecurity risk contexts", "No specific AI products, tools, or implementations described", "AI appears primarily as a risk factor rather than business opportunity"],
-    flags: ["Zero concrete details despite $17B+ annual technology investment", "No quantified benefits from any AI initiatives mentioned in filing"],
-    takeaway: "JPM's low score likely reflects deliberate vagueness — large banks hide AI strategy to protect competitive advantage in trading and risk models. Low filing score ≠ low actual AI adoption."
+    "ticker": "NVDA",
+    "company": "NVIDIA CORP",
+    "score": 94,
+    "verdict": "Genuine AI Adopter",
+    "date": "2026-02-25",
+    "scores": {
+      "SPECIFICITY": 10,
+      "FINANCIAL_IMPACT": 8,
+      "INTEGRATION_DEPTH": 10,
+      "COMPETITIVE_MOAT": 9,
+      "EXECUTION_EVIDENCE": 10
+    },
+    "findings": [
+      "NVIDIA explicitly identifies as 'a data center scale AI infrastructure company' with named platforms spanning multiple generations (Blackwell, Blackwell Ultra, Rubin) and specific software stacks (CUDA, NIM, NeMo, AI Blueprints, Cosmos, Nemotron) purpose-built for AI training, inference, agentic AI, and physical AI workloads.",
+      "The company reports 7.5 million CUDA developers, powers over 78% of TOP500 supercomputers including 9 of the top 10 Green500 systems, and has invested $76.7 billion in cumulative R&D \u2014 demonstrating massive ecosystem lock-in and sustained execution at scale.",
+      "AI is integrated across all four business segments: Data Center (training/inference infrastructure), Gaming (neural graphics and DLSS transformer models), Professional Visualization (AI-accelerated RTX PRO workflows), and Automotive (DRIVE Hyperion full-stack autonomous platform), making AI inseparable from NVIDIA's core business rather than a bolt-on initiative."
+    ],
+    "flags": [
+      "Export controls have effectively foreclosed NVIDIA from China's data center compute market, resulting in a $4.5 billion H20 inventory charge and only $60 million in licensed H20 revenue, while competitors build alternative ecosystems that could challenge NVIDIA's dominance globally.",
+      "Major CSP customers (Amazon, Microsoft, Alphabet) are developing in-house custom AI accelerators, creating a credible long-term competitive threat; the filing acknowledges customers 'have in-house expertise and internal development capabilities similar to some of ours and can use or develop their own solutions.'",
+      "Supply chain remains concentrated in Asia with manufacturing lead times exceeding 12 months, and the Groq IP license arrangement required 'significant, nonrefundable payments' with uncertain commercial viability, signaling potential pressure on NVIDIA's architectural moat."
+    ],
+    "takeaway": "NVIDIA is the definitive AI infrastructure company \u2014 AI is not a feature but the entire business thesis, with unmatched ecosystem depth across hardware, software, and developer adoption. However, investors should closely monitor the compounding impact of U.S.-China export controls eroding addressable market and the accelerating custom silicon efforts by hyperscalers, which together represent the most credible long-term threats to NVIDIA's dominant position.",
+    "disclosure_style": "verbose"
   }
 ];
 

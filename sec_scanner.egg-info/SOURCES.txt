@@ -1,0 +1,13 @@
+pyproject.toml
+sec_scanner/__init__.py
+sec_scanner/analyzer.py
+sec_scanner/cli.py
+sec_scanner/fetcher.py
+sec_scanner/history.py
+sec_scanner/reporter.py
+sec_scanner.egg-info/PKG-INFO
+sec_scanner.egg-info/SOURCES.txt
+sec_scanner.egg-info/dependency_links.txt
+sec_scanner.egg-info/entry_points.txt
+sec_scanner.egg-info/requires.txt
+sec_scanner.egg-info/top_level.txt
