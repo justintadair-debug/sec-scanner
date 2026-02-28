@@ -58,6 +58,15 @@ def analyze_filing(filing: dict) -> dict | None:
         dict with keys: ticker, company, score, verdict, scores, findings, flags, takeaway, date
         Or None on failure.
     """
+    from sec_scanner.cache import get_analysis, save_analysis
+
+    # Check analysis cache — skip Claude call if same filing already scored
+    url = filing.get("url", "")
+    cached = get_analysis(filing["ticker"], filing["date"], url)
+    if cached:
+        print(f"  [{filing['ticker']}] Using cached analysis (score: {cached['score']})")
+        return cached
+
     context_block = f"---\n{_PROJECT_CONTEXT}\n---\n\n" if _PROJECT_CONTEXT else ""
     prompt = context_block + PROMPT_TEMPLATE.format(
         ticker=filing["ticker"],
@@ -103,7 +112,7 @@ def analyze_filing(filing: dict) -> dict | None:
     scores = parsed.get("scores", {})
     total_score = sum(scores.values()) * 2  # Each dimension 0-10, 5 dims = max 50, * 2 = max 100
 
-    return {
+    result = {
         "ticker": filing["ticker"],
         "company": filing["company"],
         "score": total_score,
@@ -115,3 +124,9 @@ def analyze_filing(filing: dict) -> dict | None:
         "disclosure_style": parsed.get("disclosure_style", "standard"),
         "date": filing["date"],
     }
+
+    # Cache the result so we don't re-run Claude on the same filing
+    save_analysis(filing["ticker"], filing["date"], url, result)
+    print(f"  [{filing['ticker']}] Analysis cached")
+
+    return result

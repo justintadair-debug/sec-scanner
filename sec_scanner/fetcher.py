@@ -143,7 +143,9 @@ def fetch_filing(ticker: str) -> dict | None:
 
     Returns dict with keys: ticker, company, date, text, url
     Or None if filing could not be fetched.
+    Uses disk cache — skips download if same filing seen before.
     """
+    from sec_scanner.cache import get_filing, save_filing
     print(f"  [{ticker}] Looking up CIK...")
     cik = get_cik(ticker)
     if not cik:
@@ -160,9 +162,17 @@ def fetch_filing(ticker: str) -> dict | None:
         return None
 
     filing_url, filing_date = result
-    print(f"  [{ticker}] Downloading filing from {filing_date}...")
-    text = download_and_clean(filing_url)
-    print(f"  [{ticker}] Got {len(text):,} chars of clean text")
+
+    # Check filing text cache first
+    cached_text = get_filing(ticker, filing_date, filing_url)
+    if cached_text:
+        print(f"  [{ticker}] Using cached filing from {filing_date} ({len(cached_text):,} chars)")
+        text = cached_text
+    else:
+        print(f"  [{ticker}] Downloading filing from {filing_date}...")
+        text = download_and_clean(filing_url)
+        print(f"  [{ticker}] Got {len(text):,} chars — caching for next time")
+        save_filing(ticker, filing_date, filing_url, text)
 
     return {
         "ticker": ticker.upper(),
